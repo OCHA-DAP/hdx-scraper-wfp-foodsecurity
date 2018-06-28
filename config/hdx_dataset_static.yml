@@ -1,0 +1,8 @@
+license_id: eg. "cc-by-igo"
+subnational: eg. 1  # has to be 0 or 1
+notes: "The World Food Programme (WFP) launched the mobile Vulnerability Analysis and Mapping (mVAM) project in 2013, beginning in DRC and Somalia. mVAM uses mobile technology to track food security trends in real-time, providing high-frequency data that supports humanitarian decision-making. Data collection methods are tailored to the needs of each country that mVAM operates in. This dataset contains data from the [mVAM databank](http://vam.wfp.org/sites/mvam_monitoring/) covering various indicators (one per resource)."
+caveats: ""
+methodology: ""
+dataset_source: "World Food Programme"
+package_creator: "mcarans"
+private: False
