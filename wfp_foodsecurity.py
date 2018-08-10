@@ -20,6 +20,7 @@ from hdx.data.resource import Resource
 from hdx.data.showcase import Showcase
 from hdx.location.country import Country
 from hdx.utilities.dictandlist import write_list_to_csv
+from hdx.utilities.downloader import DownloadError
 from slugify import slugify
 
 logger = logging.getLogger(__name__)
@@ -59,45 +60,22 @@ def checkfor_mvamdata(data_url, downloader, table, country_code):
         return True
 
 
-def get_mvamdata(data_url, downloader, table, country_code, indicator_code):
-    response = downloader.setup(data_url, post=True,
-                                parameters={'table': table,
-                                            'where': "ADM0_CODE=%s AND VARIABLE='%s'" % (country_code, indicator_code)})
-    if int(response.headers['Content-Length']) < 125:
-        return None
-    else:
-        return downloader.get_json()
+def get_mvamdata(data_url, downloader, table, country_code):
+    json = list()
+    no = 0
 
-
-def process_mvamdata(mvam_url, downloader, table, country_code, variable_code, description, dataset, file_type, folder):
-    start_year = 10000
-    end_year = 0
-
-    data = get_mvamdata(mvam_url, downloader, table, country_code, variable_code)
-    if not data:
-        return start_year, end_year
-
-    dateformat = '%Y-%m-%dT%H:%M:%S'
-
-    filename = slugify('%s-%s.%s' % (table, variable_code, file_type)).lower()
-    resource_data = {
-        'name': filename,
-        'description': '%s: %s' % (table, description)
-    }
-    resource = Resource(resource_data)
-    resource.set_file_type(file_type)
-    file_to_upload = join(folder, filename)
-    for rowdict in data:
-        svydate = datetime.strptime(rowdict['SvyDate'], dateformat)
-        year = svydate.year
-        if year < start_year:
-            start_year = year
-        if year > end_year:
-            end_year = year
-    write_list_to_csv(data, file_to_upload, headers=list(data[0].keys()))
-    resource.set_file_to_upload(file_to_upload)
-    dataset.add_update_resource(resource)
-    return start_year, end_year
+    while 1:
+        response = downloader.setup(data_url, post=True,
+                                    parameters={'table': table,
+                                                'where': "ADM0_CODE=%s" % country_code,
+                                                'page': no})
+        if int(response.headers['Content-Length']) < 125:
+            if len(json) == 0:
+                return None
+            return json
+        else:
+            json += downloader.get_json()
+            no += 1
 
 
 def generate_dataset_and_showcase(mvam_url, showcase_url, showcase_lookup, downloader, countrydata, variables):
@@ -122,6 +100,7 @@ def generate_dataset_and_showcase(mvam_url, showcase_url, showcase_lookup, downl
     dataset.set_maintainer('196196be-6037-4488-8b71-d786adf4c081')
     dataset.set_organization('3ecac442-7fed-448d-8f78-b385ef6f84e7')
     dataset.set_expected_update_frequency('daily')
+    dataset.set_subnational(False)
     try:
         dataset.add_country_location(iso3)
     except HDXError as e:
@@ -136,31 +115,52 @@ def generate_dataset_and_showcase(mvam_url, showcase_url, showcase_lookup, downl
     folder = gettempdir()
     file_type = 'csv'
 
-    for variable_code in variables:
-        description = variables[variable_code]
-        start_year, end_year = process_mvamdata(mvam_url, downloader, 'pblStatsSum', country_code, variable_code,
-                                                description, dataset, file_type, folder)
-        if start_year < earliest_year:
-            earliest_year = start_year
-        if end_year > latest_year:
-            latest_year = end_year
-        start_year, end_year = process_mvamdata(mvam_url, downloader, 'pblStatsSum4Maps', country_code, variable_code,
-                                                description, dataset, file_type, folder)
-        if start_year < earliest_year:
-            earliest_year = start_year
-        if end_year > latest_year:
-            latest_year = end_year
+    dateformat = '%Y-%m-%dT%H:%M:%S'
+    table = 'pblStatsSum'
+    rows = get_mvamdata(mvam_url, downloader, table, country_code)
 
-    if len(dataset.get_resources()) == 0:
+    for row in rows:
+        description = variables.get(row['Variable'], '')
+        row['VariableDescription'] = description
+        svydate = row['SvyDate']
+        if svydate is None:
+            continue
+        svydate = datetime.strptime(svydate, dateformat)
+        year = svydate.year
+        if year < earliest_year:
+            earliest_year = year
+        elif year > latest_year:
+            latest_year = year
+
+    if earliest_year == 10000 or latest_year == 0:
         logger.exception('%s has no data!' % countryname)
         return None, None
+
     dataset.set_dataset_year_range(earliest_year, latest_year)
+
+    filename = ('%s.%s' % (table, file_type)).lower()
+    resource_data = {
+        'name': filename,
+        'description': '%s: %s' % (table, title)
+    }
+    resource = Resource(resource_data)
+    resource.set_file_type(file_type)
+    file_to_upload = join(folder, filename)
+    write_list_to_csv(rows, file_to_upload, headers=list(rows[0].keys()))
+    resource.set_file_to_upload(file_to_upload)
+    dataset.add_update_resource(resource)
+
     showcase_country = showcase_lookup.get(iso3, slugify(countryname.lower()))
+    url = showcase_url % showcase_country
+    try:
+        downloader.setup(url)
+    except DownloadError:
+        url = showcase_url % showcase_lookup[iso3]
     showcase = Showcase({
         'name': '%s-showcase' % slugified_name,
         'title': title,
         'notes': 'Reports on food security for %s' % countryname,
-        'url': showcase_url % showcase_country,
+        'url': url,
         'image_url': 'https://media.licdn.com/media/gcrc/dms/image/C5612AQHtvuWFVnGKAA/article-cover_image-shrink_423_752/0?e=2129500800&v=beta&t=00XnoAp85WXIxpygKvG7eGir_LqfxzXZz5lRGRrLUZw'
     })
     showcase.add_tags(tags)

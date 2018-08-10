@@ -7,5 +7,7 @@ showcase_lookup:
   GIN: "ebola"
   LBR: "ebola"
   SLE: "ebola"
-  DRC: "dr-congo"
+  COD: "dr-congo"
+  SWZ: "swaziland"
+  SYR: "syria"
 
