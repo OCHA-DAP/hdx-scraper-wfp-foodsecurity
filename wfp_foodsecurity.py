@@ -137,7 +137,7 @@ def generate_dataset_and_showcase(mvam_url, showcase_url, showcase_lookup, downl
             latest_year = year
 
     if earliest_year == 10000 or latest_year == 0:
-        logger.exception('%s has no data!' % countryname)
+        logger.warning('%s has no data!' % countryname)
         return None, None
 
     dataset.set_dataset_year_range(earliest_year, latest_year)
