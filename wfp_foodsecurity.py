@@ -99,7 +99,7 @@ def generate_dataset_and_showcase(mvam_url, showcase_url, showcase_lookup, downl
     })
     dataset.set_maintainer('196196be-6037-4488-8b71-d786adf4c081')
     dataset.set_organization('3ecac442-7fed-448d-8f78-b385ef6f84e7')
-    dataset.set_expected_update_frequency('daily')
+    dataset.set_expected_update_frequency('Every month')
     dataset.set_subnational(False)
     try:
         dataset.add_country_location(iso3)

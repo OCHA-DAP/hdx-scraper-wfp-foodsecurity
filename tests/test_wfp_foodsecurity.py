@@ -67,7 +67,7 @@ class TestScraperName:
         dataset, showcase = generate_dataset_and_showcase('http://yyy', showcase_url, showcase_lookup, downloader, TestScraperName.countrydata, variables)
         assert dataset == {'name': 'wfp-food-security-indicators-for-guinea', 'title': 'Guinea - Food Security Indicators',
                            'maintainer': '196196be-6037-4488-8b71-d786adf4c081', 'owner_org': '3ecac442-7fed-448d-8f78-b385ef6f84e7',
-                           'data_update_frequency': '1', 'subnational': '0', 'groups': [{'name': 'gin'}],
+                           'data_update_frequency': '30', 'subnational': '0', 'groups': [{'name': 'gin'}],
                            'tags': [{'name': 'food security'}], 'dataset_date': '01/01/2015-12/31/2015'}
         resources = dataset.get_resources()
         assert resources == [{'name': 'pblstatssum.csv', 'description': 'pblStatsSum: Guinea - Food Security Indicators', 'format': 'csv'}]
