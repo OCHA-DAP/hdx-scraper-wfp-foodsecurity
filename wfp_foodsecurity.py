@@ -117,9 +117,13 @@ def generate_dataset_and_showcase(mvam_url, showcase_url, showcase_lookup, downl
 
     dateformat = '%Y-%m-%dT%H:%M:%S'
     table = 'pblStatsSum'
-    rows = get_mvamdata(mvam_url, downloader, table, country_code)
+    inputrows = get_mvamdata(mvam_url, downloader, table, country_code)
 
-    for row in rows:
+    rows = list()
+    for row in inputrows:
+        if row['NumObs'] <= 25:
+            continue
+        rows.append(row)
         description = variables.get(row['Variable'], '')
         row['VariableDescription'] = description
         svydate = row['SvyDate']
