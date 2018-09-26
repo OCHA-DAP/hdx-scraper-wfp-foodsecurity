@@ -87,7 +87,7 @@ def generate_dataset_and_showcase(mvam_url, showcase_url, showcase_lookup, downl
     countryname = Country.get_country_name_from_iso3(iso3)
     country_code = countrydata['code']
     if not checkfor_mvamdata(mvam_url, downloader, 'pblStatsSum', country_code):
-        logger.exception('%s has no data!' % countryname)
+        logger.warning('%s has no data!' % countryname)
         return None, None
     title = '%s - Food Security Indicators' % countryname
     logger.info('Creating dataset: %s' % title)
