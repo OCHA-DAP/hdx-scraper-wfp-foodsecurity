@@ -1,15 +1,13 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """
-SCRAPERNAME:
-------------
+WFP FOOD SECURITY:
+-----------------
 
-Reads ScraperName JSON and creates datasets.
+Reads WFP food security data and creates datasets.
 
 """
-import json
 import logging
-from collections import OrderedDict
 from datetime import datetime
 from os.path import join
 from tempfile import gettempdir
