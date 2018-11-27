@@ -1,7 +1,7 @@
 ### Collector for WFP Food Security's Datasets
 [![Build Status](https://travis-ci.org/OCHA-DAP/hdx-scraper-wfp-foodsecurity.svg?branch=master&ts=1)](https://travis-ci.org/OCHA-DAP/hdx-scraper-wfp-foodsecurity) [![Coverage Status](https://coveralls.io/repos/github/OCHA-DAP/hdx-scraper-wfp-foodsecurity/badge.svg?branch=master&ts=1)](https://coveralls.io/github/OCHA-DAP/hdx-scraper-wfp-foodsecurity?branch=master)
 
-This collector connects to the [WFP Food Security](http://vam.wfp.org/sites/mvam_monitoring/) and extracts food security data country by country creating a dataset per country in HDX. It makes in the order of 20 reads from MVAM and 40 read/writes (API calls) to HDX in a one hour period. It saves 1 temporary files per country each less than 5Kb and these are what are uploaded to HDX. These files are then deleted. It runs every month. 
+This collector connects to the [WFP Food Security](http://vam.wfp.org/sites/mvam_monitoring/) website and extracts food security data country by country creating a dataset per country in HDX. It makes in the order of 20 reads from MVAM and 40 read/writes (API calls) to HDX in a one hour period. It saves 1 temporary files per country each less than 5Kb and these are what are uploaded to HDX. These files are then deleted. It runs every month. 
 
 
 ### Usage
