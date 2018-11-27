@@ -10,7 +10,6 @@ Reads WFP food security data and creates datasets.
 import logging
 from datetime import datetime
 from os.path import join
-from tempfile import gettempdir
 
 from hdx.data.dataset import Dataset
 from hdx.data.hdxobject import HDXError
@@ -76,7 +75,7 @@ def get_mvamdata(data_url, downloader, table, country_code):
             no += 1
 
 
-def generate_dataset_and_showcase(mvam_url, showcase_url, showcase_lookup, downloader, countrydata, variables):
+def generate_dataset_and_showcase(mvam_url, showcase_url, showcase_lookup, downloader, folder, countrydata, variables):
     """Parse json of the form:
     {
     },
@@ -110,7 +109,6 @@ def generate_dataset_and_showcase(mvam_url, showcase_url, showcase_lookup, downl
 
     earliest_year = 10000
     latest_year = 0
-    folder = gettempdir()
     file_type = 'csv'
 
     dateformat = '%Y-%m-%dT%H:%M:%S'

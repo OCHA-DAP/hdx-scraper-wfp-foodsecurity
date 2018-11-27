@@ -11,6 +11,7 @@ import pytest
 from hdx.hdx_configuration import Configuration
 from hdx.hdx_locations import Locations
 from hdx.utilities.downloader import DownloadError
+from hdx.utilities.path import temp_dir
 
 from wfp_foodsecurity import generate_dataset_and_showcase, get_countriesdata
 
@@ -64,13 +65,14 @@ class TestScraperName:
         showcase_url = 'http://vam.wfp.org/sites/mvam_monitoring/%s.html'
         showcase_lookup = {'GIN': 'ebola'}
         variables = {'rCSI': 'reduced coping strategy'}
-        dataset, showcase = generate_dataset_and_showcase('http://yyy', showcase_url, showcase_lookup, downloader, TestScraperName.countrydata, variables)
-        assert dataset == {'name': 'wfp-food-security-indicators-for-guinea', 'title': 'Guinea - Food Security Indicators',
-                           'maintainer': '196196be-6037-4488-8b71-d786adf4c081', 'owner_org': '3ecac442-7fed-448d-8f78-b385ef6f84e7',
-                           'data_update_frequency': '30', 'subnational': '0', 'groups': [{'name': 'gin'}],
-                           'tags': [{'name': 'food security'}], 'dataset_date': '01/01/2015-12/31/2015'}
-        resources = dataset.get_resources()
-        assert resources == [{'name': 'pblstatssum.csv', 'description': 'pblStatsSum: Guinea - Food Security Indicators', 'format': 'csv'}]
+        with temp_dir('wfp-foodsecurity') as folder:
+            dataset, showcase = generate_dataset_and_showcase('http://yyy', showcase_url, showcase_lookup, downloader, folder, TestScraperName.countrydata, variables)
+            assert dataset == {'name': 'wfp-food-security-indicators-for-guinea', 'title': 'Guinea - Food Security Indicators',
+                               'maintainer': '196196be-6037-4488-8b71-d786adf4c081', 'owner_org': '3ecac442-7fed-448d-8f78-b385ef6f84e7',
+                               'data_update_frequency': '30', 'subnational': '0', 'groups': [{'name': 'gin'}],
+                               'tags': [{'name': 'food security'}], 'dataset_date': '01/01/2015-12/31/2015'}
+            resources = dataset.get_resources()
+            assert resources == [{'name': 'pblstatssum.csv', 'description': 'pblStatsSum: Guinea - Food Security Indicators', 'format': 'csv'}]
 
-        assert showcase == {'name': 'wfp-food-security-indicators-for-guinea-showcase', 'title': 'Guinea - Food Security Indicators', 'notes': 'Reports on food security for Guinea', 'url': 'http://vam.wfp.org/sites/mvam_monitoring/ebola.html', 'image_url': 'https://media.licdn.com/media/gcrc/dms/image/C5612AQHtvuWFVnGKAA/article-cover_image-shrink_423_752/0?e=2129500800&v=beta&t=00XnoAp85WXIxpygKvG7eGir_LqfxzXZz5lRGRrLUZw', 'tags': [{'name': 'food security'}]}
+            assert showcase == {'name': 'wfp-food-security-indicators-for-guinea-showcase', 'title': 'Guinea - Food Security Indicators', 'notes': 'Reports on food security for Guinea', 'url': 'http://vam.wfp.org/sites/mvam_monitoring/ebola.html', 'image_url': 'https://media.licdn.com/media/gcrc/dms/image/C5612AQHtvuWFVnGKAA/article-cover_image-shrink_423_752/0?e=2129500800&v=beta&t=00XnoAp85WXIxpygKvG7eGir_LqfxzXZz5lRGRrLUZw', 'tags': [{'name': 'food security'}]}
 
