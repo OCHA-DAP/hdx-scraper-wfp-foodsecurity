@@ -1,1 +1,1 @@
-# WFP foodsecurity has no additional requirements to the base image
+# WFP food security has no additional requirements to the base image
