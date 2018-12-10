@@ -4,7 +4,7 @@ version: '2.1'
 services:
 
   scraper:
-    image: unocha/hdx-scraper-wfp-foodsecurity:1.0
+    image: unocha/hdx-scraper-wfp-foodsecurity:0.2
     volumes:
       - "./:/srv"
     working_dir: /srv
