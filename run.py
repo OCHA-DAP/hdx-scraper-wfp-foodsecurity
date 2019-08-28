@@ -13,9 +13,6 @@ from hdx.utilities.path import temp_dir
 
 from wfp_foodsecurity import get_countriesdata, get_mvamvariables, generate_dataset_and_showcase
 
-#from hdx.facades import logging_kwargs
-#logging_kwargs['smtp_config_yaml'] = join('config', 'smtp_configuration.yml')
-
 from hdx.facades.simple import facade
 
 logger = logging.getLogger(__name__)
