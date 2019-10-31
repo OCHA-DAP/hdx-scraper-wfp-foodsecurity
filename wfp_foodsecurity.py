@@ -51,10 +51,10 @@ def checkfor_mvamdata(data_url, downloader, table, country_code):
     response = downloader.setup(data_url, post=True,
                                 parameters={'table': table,
                                             'where': "ADM0_CODE=%s" % country_code})
-    if int(response.headers['Content-Length']) < 125:
-        return False
-    else:
+    if 'Transfer-Encoding' in response.headers:
         return True
+    else:
+        return False
 
 
 def get_mvamdata(data_url, downloader, table, country_code):
@@ -66,13 +66,13 @@ def get_mvamdata(data_url, downloader, table, country_code):
                                     parameters={'table': table,
                                                 'where': "ADM0_CODE=%s" % country_code,
                                                 'page': no})
-        if int(response.headers['Content-Length']) < 125:
+        if 'Transfer-Encoding' in response.headers:
+            json += downloader.get_json()
+            no += 1
+        else:
             if len(json) == 0:
                 return None
             return json
-        else:
-            json += downloader.get_json()
-            no += 1
 
 
 def generate_dataset_and_showcase(mvam_url, showcase_url, showcase_lookup, downloader, folder, countrydata, variables):
@@ -85,7 +85,7 @@ def generate_dataset_and_showcase(mvam_url, showcase_url, showcase_lookup, downl
     country_code = countrydata['code']
     if not checkfor_mvamdata(mvam_url, downloader, 'pblStatsSum', country_code):
         logger.warning('%s has no data!' % countryname)
-        return None, None
+        return None, None, None
     title = '%s - Food Security Indicators' % countryname
     logger.info('Creating dataset: %s' % title)
     name = 'WFP Food Security indicators for %s' % countryname
@@ -94,7 +94,7 @@ def generate_dataset_and_showcase(mvam_url, showcase_url, showcase_lookup, downl
         'name': slugified_name,
         'title': title,
     })
-    dataset.set_maintainer('196196be-6037-4488-8b71-d786adf4c081')
+    dataset.set_maintainer('eda0ee04-7436-47f0-87ab-d1b9edcd3bb9')
     dataset.set_organization('3ecac442-7fed-448d-8f78-b385ef6f84e7')
     dataset.set_expected_update_frequency('Every month')
     dataset.set_subnational(False)
@@ -102,9 +102,9 @@ def generate_dataset_and_showcase(mvam_url, showcase_url, showcase_lookup, downl
         dataset.add_country_location(iso3)
     except HDXError as e:
         logger.exception('%s has a problem! %s' % (countryname, e))
-        return None, None
+        return None, None, None
 
-    tags = ['food security']
+    tags = ['hxl', 'food security', 'indicators']
     dataset.add_tags(tags)
 
     earliest_year = 10000
@@ -116,11 +116,23 @@ def generate_dataset_and_showcase(mvam_url, showcase_url, showcase_lookup, downl
     inputrows = get_mvamdata(mvam_url, downloader, table, country_code)
 
     rows = list()
+    hxlrow = {'SvyDate': '#date', 'ADM0_NAME': '#country+name', 'ADM1_NAME': '#adm1+name', 'ADM2_NAME': '#adm2+name',
+              'AdminStrata': '#loc+name', 'Variable': '#indicator+code', 'VariableDescription': '#indicator+name',
+              'Demographic': '#category', 'Mean': '#indicator+value+num'}
+    rows.append(hxlrow)
+    bites_disabled = [True, True, True]
     for row in inputrows:
         if row['NumObs'] <= 25:
             continue
         rows.append(row)
-        description = variables.get(row['Variable'], '')
+        indicator_code = row['Variable']
+        if indicator_code == 'rCSI':
+            bites_disabled[0] = False
+        elif indicator_code == 'FCS':
+            bites_disabled[1] = False
+        elif indicator_code == 'Proteins':
+            bites_disabled[2] = False
+        description = variables.get(indicator_code, '')
         row['VariableDescription'] = description
         svydate = row['SvyDate']
         if svydate is None:
@@ -134,7 +146,7 @@ def generate_dataset_and_showcase(mvam_url, showcase_url, showcase_lookup, downl
 
     if earliest_year == 10000 or latest_year == 0:
         logger.warning('%s has no data!' % countryname)
-        return None, None
+        return None, None, None
 
     dataset.set_dataset_year_range(earliest_year, latest_year)
 
@@ -164,4 +176,4 @@ def generate_dataset_and_showcase(mvam_url, showcase_url, showcase_lookup, downl
         'image_url': 'https://media.licdn.com/media/gcrc/dms/image/C5612AQHtvuWFVnGKAA/article-cover_image-shrink_423_752/0?e=2129500800&v=beta&t=00XnoAp85WXIxpygKvG7eGir_LqfxzXZz5lRGRrLUZw'
     })
     showcase.add_tags(tags)
-    return dataset, showcase
+    return dataset, showcase, bites_disabled

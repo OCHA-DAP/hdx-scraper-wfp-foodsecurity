@@ -35,11 +35,13 @@ def main():
             variables = get_mvamvariables(indicators_url, downloader)
             logger.info('Number of datasets to upload: %d' % len(countriesdata))
             for countrydata in countriesdata:
-                dataset, showcase = generate_dataset_and_showcase(mvam_url, showcase_url, showcase_lookup,
-                                                                  downloader, folder, countrydata, variables)
+                dataset, showcase, bites_disabled = \
+                    generate_dataset_and_showcase(mvam_url, showcase_url, showcase_lookup, downloader, folder,
+                                                  countrydata, variables)
                 if dataset:
                     dataset.update_from_yaml()
                     dataset.create_in_hdx(remove_additional_resources=True, hxl_update=False)
+                    dataset.generate_resource_view(bites_disabled=bites_disabled)
                     showcase.create_in_hdx()
                     showcase.add_dataset(dataset)
 

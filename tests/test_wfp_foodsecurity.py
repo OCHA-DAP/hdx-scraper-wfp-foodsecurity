@@ -8,8 +8,10 @@ from collections import OrderedDict
 from os.path import join
 
 import pytest
+from hdx.data.vocabulary import Vocabulary
 from hdx.hdx_configuration import Configuration
 from hdx.hdx_locations import Locations
+from hdx.location.country import Country
 from hdx.utilities.downloader import DownloadError
 from hdx.utilities.path import temp_dir
 
@@ -24,6 +26,9 @@ class TestScraperName:
         Configuration._create(hdx_read_only=True, user_agent='test',
                               project_config_yaml=join('tests', 'config', 'project_configuration.yml'))
         Locations.set_validlocations([{'name': 'gin', 'title': 'Guinea'}])  # add locations used in tests
+        Country.countriesdata(use_live=False)
+        Vocabulary._tags_dict = True
+        Vocabulary._approved_vocabulary = {'tags': [{'name': 'hxl'}, {'name': 'food security'}, {'name': 'indicators'}], 'id': '4e61d464-4943-4e97-973a-84673c1aaa87', 'name': 'approved'}
 
     @pytest.fixture(scope='function')
     def downloader(self):
@@ -39,9 +44,9 @@ class TestScraperName:
                 response = Response()
 
                 if not 'page' in parameters or parameters['page'] == 0:
-                    response.headers = {'Content-Length': 300}
+                    response.headers = {'Transfer-Encoding': 'chunked'}
                 else:
-                    response.headers = {'Content-Length': 100}
+                    response.headers = dict()
                 if url == 'http://yyy':
                     return response
 
@@ -66,13 +71,13 @@ class TestScraperName:
         showcase_lookup = {'GIN': 'ebola'}
         variables = {'rCSI': 'reduced coping strategy'}
         with temp_dir('wfp-foodsecurity') as folder:
-            dataset, showcase = generate_dataset_and_showcase('http://yyy', showcase_url, showcase_lookup, downloader, folder, TestScraperName.countrydata, variables)
+            dataset, showcase, bites_disabled = generate_dataset_and_showcase('http://yyy', showcase_url, showcase_lookup, downloader, folder, TestScraperName.countrydata, variables)
             assert dataset == {'name': 'wfp-food-security-indicators-for-guinea', 'title': 'Guinea - Food Security Indicators',
-                               'maintainer': '196196be-6037-4488-8b71-d786adf4c081', 'owner_org': '3ecac442-7fed-448d-8f78-b385ef6f84e7',
+                               'maintainer': 'eda0ee04-7436-47f0-87ab-d1b9edcd3bb9', 'owner_org': '3ecac442-7fed-448d-8f78-b385ef6f84e7',
                                'data_update_frequency': '30', 'subnational': '0', 'groups': [{'name': 'gin'}],
-                               'tags': [{'name': 'food security'}], 'dataset_date': '01/01/2015-12/31/2015'}
+                               'tags': [{'name': 'hxl', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}, {'name': 'food security', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}, {'name': 'indicators', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}], 'dataset_date': '01/01/2015-12/31/2015'}
             resources = dataset.get_resources()
-            assert resources == [{'name': 'pblstatssum.csv', 'description': 'pblStatsSum: Guinea - Food Security Indicators', 'format': 'csv'}]
+            assert resources == [{'name': 'pblstatssum.csv', 'description': 'pblStatsSum: Guinea - Food Security Indicators', 'format': 'csv', 'resource_type': 'file.upload', 'url_type': 'upload'}]
 
-            assert showcase == {'name': 'wfp-food-security-indicators-for-guinea-showcase', 'title': 'Guinea - Food Security Indicators', 'notes': 'Reports on food security for Guinea', 'url': 'http://vam.wfp.org/sites/mvam_monitoring/ebola.html', 'image_url': 'https://media.licdn.com/media/gcrc/dms/image/C5612AQHtvuWFVnGKAA/article-cover_image-shrink_423_752/0?e=2129500800&v=beta&t=00XnoAp85WXIxpygKvG7eGir_LqfxzXZz5lRGRrLUZw', 'tags': [{'name': 'food security'}]}
-
+            assert showcase == {'name': 'wfp-food-security-indicators-for-guinea-showcase', 'title': 'Guinea - Food Security Indicators', 'notes': 'Reports on food security for Guinea', 'url': 'http://vam.wfp.org/sites/mvam_monitoring/ebola.html', 'image_url': 'https://media.licdn.com/media/gcrc/dms/image/C5612AQHtvuWFVnGKAA/article-cover_image-shrink_423_752/0?e=2129500800&v=beta&t=00XnoAp85WXIxpygKvG7eGir_LqfxzXZz5lRGRrLUZw', 'tags': [{'name': 'hxl', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}, {'name': 'food security', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}, {'name': 'indicators', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}]}
+            assert bites_disabled == [False, True, True]

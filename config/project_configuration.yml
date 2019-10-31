@@ -1,8 +1,8 @@
 # Collector specific configuration
-countries_url: "http://vam.wfp.org/sites/data/api/adm0code.csv"
-indicators_url: "http://vam.wfp.org/mvam_monitoring/mvam_dictionary.xlsx"
-mvam_url: "http://vam.wfp.org/mvam_monitoring/api.aspx"
-showcase_url: "http://vam.wfp.org/sites/mvam_monitoring/%s.html"
+countries_url: "https://vam.wfp.org/sites/data/api/adm0code.csv"
+indicators_url: "https://vam.wfp.org/mvam_monitoring/mvam_dictionary.xlsx"
+mvam_url: "https://vam.wfp.org/mvam_monitoring/api.aspx"
+showcase_url: "https://vam.wfp.org/sites/mvam_monitoring/%s.html"
 showcase_lookup:
   GIN: "ebola"
   LBR: "ebola"
