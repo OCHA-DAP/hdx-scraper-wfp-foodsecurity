@@ -22,8 +22,13 @@ from slugify import slugify
 
 logger = logging.getLogger(__name__)
 
+headers = ['SvyDate', 'ADM0_NAME', 'ADM1_NAME', 'ADM2_NAME', 'AdminStrata', 'Variable', 'VariableDescription', 'Demographic', 'Mean']
+hxlrow = {'SvyDate': '#date', 'ADM0_NAME': '#country+name', 'ADM1_NAME': '#adm1+name', 'ADM2_NAME': '#adm2+name',
+          'AdminStrata': '#loc+name', 'Variable': '#indicator+code', 'VariableDescription': '#indicator+name',
+          'Demographic': '#category', 'Mean': '#indicator+value+num'}
 
-def get_countriesdata(countries_url, downloader):
+
+def get_countries(countries_url, downloader):
     """Download a list of countries and provide mapping if necessary.
     A list of dictionaries is returned, each containing the following keys:
     iso3 - ISO 3 country code
@@ -32,7 +37,8 @@ def get_countriesdata(countries_url, downloader):
     """
     countries = list()
 
-    for row in downloader.get_tabular_rows(countries_url, dict_rows=True, headers=1, format='csv'):
+    headers, iterator = downloader.get_tabular_rows(countries_url, headers=1, dict_form=True, format='csv')
+    for row in iterator:
         wfp_name = row['ADM0_NAME']
         code = row['ADM0_CODE']
         iso3, fuzzy = Country.get_iso3_country_code_fuzzy(wfp_name)
@@ -107,19 +113,13 @@ def generate_dataset_and_showcase(mvam_url, showcase_url, showcase_lookup, downl
     tags = ['hxl', 'food security', 'indicators']
     dataset.add_tags(tags)
 
-    earliest_year = 10000
-    latest_year = 0
-    file_type = 'csv'
+    years = set()
 
     dateformat = '%Y-%m-%dT%H:%M:%S'
     table = 'pblStatsSum'
     inputrows = get_mvamdata(mvam_url, downloader, table, country_code)
 
-    rows = list()
-    hxlrow = {'SvyDate': '#date', 'ADM0_NAME': '#country+name', 'ADM1_NAME': '#adm1+name', 'ADM2_NAME': '#adm2+name',
-              'AdminStrata': '#loc+name', 'Variable': '#indicator+code', 'VariableDescription': '#indicator+name',
-              'Demographic': '#category', 'Mean': '#indicator+value+num'}
-    rows.append(hxlrow)
+    rows = [hxlrow]
     bites_disabled = [True, True, True]
     for row in inputrows:
         if row['NumObs'] <= 25:
@@ -138,29 +138,20 @@ def generate_dataset_and_showcase(mvam_url, showcase_url, showcase_lookup, downl
         if svydate is None:
             continue
         svydate = datetime.strptime(svydate, dateformat)
-        year = svydate.year
-        if year < earliest_year:
-            earliest_year = year
-        elif year > latest_year:
-            latest_year = year
+        years.add(svydate.year)
 
-    if earliest_year == 10000 or latest_year == 0:
+    if len(years) == 0:
         logger.warning('%s has no data!' % countryname)
         return None, None, None
 
-    dataset.set_dataset_year_range(earliest_year, latest_year)
+    dataset.set_dataset_year_range(years)
 
-    filename = ('%s.%s' % (table, file_type)).lower()
-    resource_data = {
-        'name': filename,
+    filename = ('%s.csv' % table).lower()
+    resourcedata = {
+        'name': table,
         'description': '%s: %s' % (table, title)
     }
-    resource = Resource(resource_data)
-    resource.set_file_type(file_type)
-    file_to_upload = join(folder, filename)
-    write_list_to_csv(rows, file_to_upload, headers=list(rows[0].keys()))
-    resource.set_file_to_upload(file_to_upload)
-    dataset.add_update_resource(resource)
+    dataset.generate_resource_from_rows(folder, filename, rows, resourcedata, headers=headers)
 
     showcase_country = showcase_lookup.get(iso3, slugify(countryname.lower()))
     url = showcase_url % showcase_country

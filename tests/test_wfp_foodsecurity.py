@@ -15,7 +15,7 @@ from hdx.location.country import Country
 from hdx.utilities.downloader import DownloadError
 from hdx.utilities.path import temp_dir
 
-from wfp_foodsecurity import generate_dataset_and_showcase, get_countriesdata
+from wfp_foodsecurity import generate_dataset_and_showcase, get_countries
 
 
 class TestScraperName:
@@ -56,14 +56,14 @@ class TestScraperName:
                         OrderedDict([('RowNum', 169), ('ID', 3788), ('SvyID', 48), ('PnlID', 1), ('SvyDate', '2015-06-01T00:00:00'), ('SvyYear', 2015), ('SvyMonth', 'June'), ('SvyMonthNum', 6), ('ADM0_NAME', 'Guinea'), ('ADM1_NAME', None), ('ADM2_NAME', None), ('IndpVars', 'HoHSex,ToiletTypeGrp'), ('Variable', 'rCSI'), ('AdminStrata', None), ('Demographic', 'F,Bush pit latrine'), ('NumObs', 80), ('Mean', 25.79668), ('StDev', 12.32078), ('CnfIntvHi', 29.15365), ('CnfIntvLo', 22.4397), ('Median', 28.0), ('Pctl5', 1.41855), ('Pctl25', 18.0), ('Pctl75', 34.80567), ('Pctl95', 45.49957), ('HLAvg', 24.0), ('ADM0_CODE', 106.0)])]
 
             @staticmethod
-            def get_tabular_rows(url, dict_rows, headers, format):
+            def get_tabular_rows(url, **kwargs):
                 if url == 'http://xxx/adm0code.csv':
-                    return [{'ADM0_CODE': '50', 'ADM0_NAME': 'Guinea'}]
+                    return ['ADM0_CODE', 'ADM0_NAME'], [{'ADM0_CODE': '50', 'ADM0_NAME': 'Guinea'}]
 
         return Download()
 
-    def test_get_countriesdata(self, downloader):
-        countriesdata = get_countriesdata('http://xxx/adm0code.csv', downloader)
+    def test_get_countries(self, downloader):
+        countriesdata = get_countries('http://xxx/adm0code.csv', downloader)
         assert countriesdata == [TestScraperName.countrydata]
 
     def test_generate_dataset_and_showcase(self, configuration, downloader):
@@ -77,7 +77,7 @@ class TestScraperName:
                                'data_update_frequency': '30', 'subnational': '0', 'groups': [{'name': 'gin'}],
                                'tags': [{'name': 'hxl', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}, {'name': 'food security', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}, {'name': 'indicators', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}], 'dataset_date': '01/01/2015-12/31/2015'}
             resources = dataset.get_resources()
-            assert resources == [{'name': 'pblstatssum.csv', 'description': 'pblStatsSum: Guinea - Food Security Indicators', 'format': 'csv', 'resource_type': 'file.upload', 'url_type': 'upload'}]
+            assert resources == [{'name': 'pblStatsSum', 'description': 'pblStatsSum: Guinea - Food Security Indicators', 'format': 'csv', 'resource_type': 'file.upload', 'url_type': 'upload'}]
 
             assert showcase == {'name': 'wfp-food-security-indicators-for-guinea-showcase', 'title': 'Guinea - Food Security Indicators', 'notes': 'Reports on food security for Guinea', 'url': 'http://vam.wfp.org/sites/mvam_monitoring/ebola.html', 'image_url': 'https://media.licdn.com/media/gcrc/dms/image/C5612AQHtvuWFVnGKAA/article-cover_image-shrink_423_752/0?e=2129500800&v=beta&t=00XnoAp85WXIxpygKvG7eGir_LqfxzXZz5lRGRrLUZw', 'tags': [{'name': 'hxl', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}, {'name': 'food security', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}, {'name': 'indicators', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}]}
             assert bites_disabled == [False, True, True]
