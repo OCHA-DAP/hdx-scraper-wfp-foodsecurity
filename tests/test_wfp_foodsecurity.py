@@ -77,7 +77,8 @@ class TestScraperName:
                                'data_update_frequency': '30', 'subnational': '0', 'groups': [{'name': 'gin'}],
                                'tags': [{'name': 'hxl', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}, {'name': 'food security', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}, {'name': 'indicators', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}], 'dataset_date': '01/01/2015-12/31/2015'}
             resources = dataset.get_resources()
-            assert resources == [{'name': 'pblStatsSum', 'description': 'pblStatsSum: Guinea - Food Security Indicators', 'format': 'csv', 'resource_type': 'file.upload', 'url_type': 'upload'}]
+            assert resources == [{'name': 'pblStatsSum', 'description': 'pblStatsSum: Guinea - Food Security Indicators', 'format': 'csv', 'resource_type': 'file.upload', 'url_type': 'upload'},
+                                 {'name': 'QuickCharts-pblStatsSum', 'description': 'Cut down data for QuickCharts', 'format': 'csv', 'resource_type': 'file.upload', 'url_type': 'upload'}]
 
             assert showcase == {'name': 'wfp-food-security-indicators-for-guinea-showcase', 'title': 'Guinea - Food Security Indicators', 'notes': 'Reports on food security for Guinea', 'url': 'http://vam.wfp.org/sites/mvam_monitoring/ebola.html', 'image_url': 'https://media.licdn.com/media/gcrc/dms/image/C5612AQHtvuWFVnGKAA/article-cover_image-shrink_423_752/0?e=2129500800&v=beta&t=00XnoAp85WXIxpygKvG7eGir_LqfxzXZz5lRGRrLUZw', 'tags': [{'name': 'hxl', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}, {'name': 'food security', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}, {'name': 'indicators', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}]}
             assert bites_disabled == [False, True, True]

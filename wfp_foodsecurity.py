@@ -23,7 +23,7 @@ from slugify import slugify
 logger = logging.getLogger(__name__)
 
 headers = ['SvyDate', 'ADM0_NAME', 'ADM1_NAME', 'ADM2_NAME', 'AdminStrata', 'Variable', 'VariableDescription', 'Demographic', 'Mean']
-hxlrow = {'SvyDate': '#date', 'ADM0_NAME': '#country+name', 'ADM1_NAME': '#adm1+name', 'ADM2_NAME': '#adm2+name',
+hxltags = {'SvyDate': '#date', 'ADM0_NAME': '#country+name', 'ADM1_NAME': '#adm1+name', 'ADM2_NAME': '#adm2+name',
           'AdminStrata': '#loc+name', 'Variable': '#indicator+code', 'VariableDescription': '#indicator+name',
           'Demographic': '#category', 'Mean': '#indicator+value+num'}
 
@@ -113,45 +113,34 @@ def generate_dataset_and_showcase(mvam_url, showcase_url, showcase_lookup, downl
     tags = ['hxl', 'food security', 'indicators']
     dataset.add_tags(tags)
 
-    years = set()
-
     dateformat = '%Y-%m-%dT%H:%M:%S'
     table = 'pblStatsSum'
     inputrows = get_mvamdata(mvam_url, downloader, table, country_code)
-
-    rows = [hxlrow]
-    bites_disabled = [True, True, True]
-    for row in inputrows:
-        if row['NumObs'] <= 25:
-            continue
-        rows.append(row)
-        indicator_code = row['Variable']
-        if indicator_code == 'rCSI':
-            bites_disabled[0] = False
-        elif indicator_code == 'FCS':
-            bites_disabled[1] = False
-        elif indicator_code == 'Proteins':
-            bites_disabled[2] = False
-        description = variables.get(indicator_code, '')
-        row['VariableDescription'] = description
-        svydate = row['SvyDate']
-        if svydate is None:
-            continue
-        svydate = datetime.strptime(svydate, dateformat)
-        years.add(svydate.year)
-
-    if len(years) == 0:
-        logger.warning('%s has no data!' % countryname)
-        return None, None, None
-
-    dataset.set_dataset_year_range(years)
 
     filename = ('%s.csv' % table).lower()
     resourcedata = {
         'name': table,
         'description': '%s: %s' % (table, title)
     }
-    dataset.generate_resource_from_rows(folder, filename, rows, resourcedata, headers=headers)
+
+    def process_year(years, row):
+        if row['NumObs'] <= 25:
+            return True
+        row['VariableDescription'] = variables.get(row['Variable'], '')
+        svydate = row['SvyDate']
+        if svydate is None:
+            return True
+        svydate = datetime.strptime(svydate, dateformat)
+        years.add(svydate.year)
+
+    quickcharts = {'hashtag': '#indicator+code', 'values': ['rCSI', 'FCS', 'Proteins'], 'cutdown': 2,
+                   'cutdownhashtags': ['#date', '#category', '#indicator+code', '#indicator+value+num']}
+    success, results = dataset.generate_resource_from_download(
+        headers, inputrows, hxltags, folder, filename, resourcedata, year_function=process_year, quickcharts=quickcharts)
+    if success is False:
+        logger.warning('%s has no data!' % countryname)
+        return None, None, None
+
 
     showcase_country = showcase_lookup.get(iso3, slugify(countryname.lower()))
     url = showcase_url % showcase_country
@@ -167,4 +156,4 @@ def generate_dataset_and_showcase(mvam_url, showcase_url, showcase_lookup, downl
         'image_url': 'https://media.licdn.com/media/gcrc/dms/image/C5612AQHtvuWFVnGKAA/article-cover_image-shrink_423_752/0?e=2129500800&v=beta&t=00XnoAp85WXIxpygKvG7eGir_LqfxzXZz5lRGRrLUZw'
     })
     showcase.add_tags(tags)
-    return dataset, showcase, bites_disabled
+    return dataset, showcase, results['bites_disabled']
