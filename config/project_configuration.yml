@@ -1,13 +1,5 @@
 # Collector specific configuration
-countries_url: "https://vam.wfp.org/sites/data/api/adm0code.csv"
+countries_filename: "Adm0Code.csv"
 indicators_url: "https://vam.wfp.org/mvam_monitoring/mvam_dictionary.xlsx"
 mvam_url: "https://vam.wfp.org/mvam_monitoring/api.aspx"
-showcase_url: "https://vam.wfp.org/sites/mvam_monitoring/%s.html"
-showcase_lookup:
-  GIN: "ebola"
-  LBR: "ebola"
-  SLE: "ebola"
-  COD: "dr-congo"
-  SWZ: "swaziland"
-  SYR: "syria"
-
+showcase_url: "https://vam.wfp.org/CountryPage_assessments.aspx?iso3=%s"

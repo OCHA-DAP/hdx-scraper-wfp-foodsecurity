@@ -25,7 +25,7 @@ hxltags = {'SvyDate': '#date', 'ADM0_NAME': '#country+name', 'ADM1_NAME': '#adm1
           'Demographic': '#category', 'Mean': '#indicator+value+num'}
 
 
-def get_countries(countries_url, downloader):
+def get_countries(countries_path, downloader):
     """Download a list of countries and provide mapping if necessary.
     A list of dictionaries is returned, each containing the following keys:
     iso3 - ISO 3 country code
@@ -34,7 +34,7 @@ def get_countries(countries_url, downloader):
     """
     countries = list()
 
-    headers, iterator = downloader.get_tabular_rows(countries_url, headers=1, dict_form=True, format='csv')
+    headers, iterator = downloader.get_tabular_rows(countries_path, headers=1, dict_form=True, format='csv')
     for row in iterator:
         wfp_name = row['ADM0_NAME']
         code = row['ADM0_CODE']
@@ -78,7 +78,7 @@ def get_mvamdata(data_url, downloader, table, country_code):
             return json
 
 
-def generate_dataset_and_showcase(mvam_url, showcase_url, showcase_lookup, downloader, folder, countrydata, variables):
+def generate_dataset_and_showcase(mvam_url, showcase_url, downloader, folder, countrydata, variables):
     """Parse json of the form:
     {
     },
@@ -130,7 +130,7 @@ def generate_dataset_and_showcase(mvam_url, showcase_url, showcase_lookup, downl
         svydate = datetime.strptime(svydate, dateformat)
         years.add(svydate.year)
 
-    quickcharts = {'hashtag': '#indicator+code', 'values': ['rCSI', 'FCS', 'Proteins'], 'cutdown': 2,
+    quickcharts = {'hashtag': '#indicator+code', 'values': ['FCS', 'rCSI', 'Proteins'], 'cutdown': 2,
                    'cutdownhashtags': ['#date', '#category', '#indicator+code', '#indicator+value+num']}
     success, results = dataset.generate_resource_from_download(
         headers, inputrows, hxltags, folder, filename, resourcedata, year_function=process_year, quickcharts=quickcharts)
@@ -138,18 +138,11 @@ def generate_dataset_and_showcase(mvam_url, showcase_url, showcase_lookup, downl
         logger.warning('%s has no data!' % countryname)
         return None, None, None
 
-
-    showcase_country = showcase_lookup.get(iso3, slugify(countryname.lower()))
-    url = showcase_url % showcase_country
-    try:
-        downloader.setup(url)
-    except DownloadError:
-        url = showcase_url % showcase_lookup[iso3]
     showcase = Showcase({
         'name': '%s-showcase' % slugified_name,
         'title': title,
         'notes': 'Reports on food security for %s' % countryname,
-        'url': url,
+        'url': showcase_url % iso3,
         'image_url': 'https://media.licdn.com/media/gcrc/dms/image/C5612AQHtvuWFVnGKAA/article-cover_image-shrink_423_752/0?e=2129500800&v=beta&t=00XnoAp85WXIxpygKvG7eGir_LqfxzXZz5lRGRrLUZw'
     })
     showcase.add_tags(tags)

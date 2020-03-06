@@ -57,21 +57,20 @@ class TestScraperName:
 
             @staticmethod
             def get_tabular_rows(url, **kwargs):
-                if url == 'http://xxx/adm0code.csv':
+                if url == 'config/adm0code.csv':
                     return ['ADM0_CODE', 'ADM0_NAME'], [{'ADM0_CODE': '50', 'ADM0_NAME': 'Guinea'}]
 
         return Download()
 
     def test_get_countries(self, downloader):
-        countriesdata = get_countries('http://xxx/adm0code.csv', downloader)
+        countriesdata = get_countries('config/adm0code.csv', downloader)
         assert countriesdata == [TestScraperName.countrydata]
 
     def test_generate_dataset_and_showcase(self, configuration, downloader):
-        showcase_url = 'http://vam.wfp.org/sites/mvam_monitoring/%s.html'
-        showcase_lookup = {'GIN': 'ebola'}
+        showcase_url = 'https://vam.wfp.org/CountryPage_assessments.aspx?iso3=%s'
         variables = {'rCSI': 'reduced coping strategy'}
         with temp_dir('wfp-foodsecurity') as folder:
-            dataset, showcase, bites_disabled = generate_dataset_and_showcase('http://yyy', showcase_url, showcase_lookup, downloader, folder, TestScraperName.countrydata, variables)
+            dataset, showcase, bites_disabled = generate_dataset_and_showcase('http://yyy', showcase_url, downloader, folder, TestScraperName.countrydata, variables)
             assert dataset == {'name': 'wfp-food-security-indicators-for-guinea', 'title': 'Guinea - Food Security Indicators',
                                'maintainer': 'eda0ee04-7436-47f0-87ab-d1b9edcd3bb9', 'owner_org': '3ecac442-7fed-448d-8f78-b385ef6f84e7',
                                'data_update_frequency': '30', 'subnational': '0', 'groups': [{'name': 'gin'}],
@@ -80,5 +79,5 @@ class TestScraperName:
             assert resources == [{'name': 'pblStatsSum', 'description': 'pblStatsSum: Guinea - Food Security Indicators', 'format': 'csv', 'resource_type': 'file.upload', 'url_type': 'upload'},
                                  {'name': 'QuickCharts-pblStatsSum', 'description': 'Cut down data for QuickCharts', 'format': 'csv', 'resource_type': 'file.upload', 'url_type': 'upload'}]
 
-            assert showcase == {'name': 'wfp-food-security-indicators-for-guinea-showcase', 'title': 'Guinea - Food Security Indicators', 'notes': 'Reports on food security for Guinea', 'url': 'http://vam.wfp.org/sites/mvam_monitoring/ebola.html', 'image_url': 'https://media.licdn.com/media/gcrc/dms/image/C5612AQHtvuWFVnGKAA/article-cover_image-shrink_423_752/0?e=2129500800&v=beta&t=00XnoAp85WXIxpygKvG7eGir_LqfxzXZz5lRGRrLUZw', 'tags': [{'name': 'hxl', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}, {'name': 'food security', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}, {'name': 'indicators', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}]}
-            assert bites_disabled == [False, True, True]
+            assert showcase == {'name': 'wfp-food-security-indicators-for-guinea-showcase', 'title': 'Guinea - Food Security Indicators', 'notes': 'Reports on food security for Guinea', 'url': 'https://vam.wfp.org/CountryPage_assessments.aspx?iso3=GIN', 'image_url': 'https://media.licdn.com/media/gcrc/dms/image/C5612AQHtvuWFVnGKAA/article-cover_image-shrink_423_752/0?e=2129500800&v=beta&t=00XnoAp85WXIxpygKvG7eGir_LqfxzXZz5lRGRrLUZw', 'tags': [{'name': 'hxl', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}, {'name': 'food security', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}, {'name': 'indicators', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}]}
+            assert bites_disabled == [True, False, True]
