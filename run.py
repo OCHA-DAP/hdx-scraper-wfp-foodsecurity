@@ -32,14 +32,14 @@ def main():
         countries = get_countries(countries_path, downloader)
         variables = get_mvamvariables(indicators_url, downloader)
         logger.info('Number of datasets to upload: %d' % len(countries))
-        for folder, country in progress_storing_tempdir('WFPFoodSecurity', countries, 'iso3'):
+        for info, country in progress_storing_tempdir('WFPFoodSecurity', countries, 'iso3'):
             dataset, showcase, bites_disabled = \
-                generate_dataset_and_showcase(mvam_url, showcase_url, downloader, folder,
+                generate_dataset_and_showcase(mvam_url, showcase_url, downloader, info['folder'],
                                               country, variables)
             if dataset:
                 dataset.update_from_yaml()
                 dataset.generate_resource_view(bites_disabled=bites_disabled)
-                dataset.create_in_hdx(remove_additional_resources=True, hxl_update=False, updated_by_script='HDX Scraper: WFP Food Security')
+                dataset.create_in_hdx(remove_additional_resources=True, hxl_update=False, updated_by_script='HDX Scraper: WFP Food Security', batch=info['batch'])
                 showcase.create_in_hdx()
                 showcase.add_dataset(dataset)
 

@@ -120,20 +120,20 @@ def generate_dataset_and_showcase(mvam_url, showcase_url, downloader, folder, co
         'description': '%s: %s' % (table, title)
     }
 
-    def process_year(years, row):
+    def process_date(row):
         if row['NumObs'] <= 25:
-            return True
+            return None
         row['VariableDescription'] = variables.get(row['Variable'], '')
         svydate = row['SvyDate']
         if svydate is None:
-            return True
+            return None
         svydate = datetime.strptime(svydate, dateformat)
-        years.add(svydate.year)
+        return {'startdate': svydate, 'enddate': svydate}
 
     quickcharts = {'hashtag': '#indicator+code', 'values': ['FCS', 'rCSI', 'Proteins'], 'cutdown': 2,
                    'cutdownhashtags': ['#date', '#category', '#indicator+code', '#indicator+value+num']}
-    success, results = dataset.generate_resource_from_download(
-        headers, inputrows, hxltags, folder, filename, resourcedata, year_function=process_year, quickcharts=quickcharts)
+    success, results = dataset.generate_resource_from_iterator(
+        headers, inputrows, hxltags, folder, filename, resourcedata, date_function=process_date, quickcharts=quickcharts)
     if success is False:
         logger.warning('%s has no data!' % countryname)
         return None, None, None

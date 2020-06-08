@@ -74,7 +74,7 @@ class TestScraperName:
             assert dataset == {'name': 'wfp-food-security-indicators-for-guinea', 'title': 'Guinea - Food Security Indicators',
                                'maintainer': 'eda0ee04-7436-47f0-87ab-d1b9edcd3bb9', 'owner_org': '3ecac442-7fed-448d-8f78-b385ef6f84e7',
                                'data_update_frequency': '30', 'subnational': '0', 'groups': [{'name': 'gin'}],
-                               'tags': [{'name': 'hxl', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}, {'name': 'food security', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}, {'name': 'indicators', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}], 'dataset_date': '01/01/2015-12/31/2015'}
+                               'tags': [{'name': 'hxl', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}, {'name': 'food security', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}, {'name': 'indicators', 'vocabulary_id': '4e61d464-4943-4e97-973a-84673c1aaa87'}], 'dataset_date': '06/01/2015'}
             resources = dataset.get_resources()
             assert resources == [{'name': 'pblStatsSum', 'description': 'pblStatsSum: Guinea - Food Security Indicators', 'format': 'csv', 'resource_type': 'file.upload', 'url_type': 'upload'},
                                  {'name': 'QuickCharts-pblStatsSum', 'description': 'Cut down data for QuickCharts', 'format': 'csv', 'resource_type': 'file.upload', 'url_type': 'upload'}]
